@@ -4,6 +4,4 @@
 
 ### 文章列表
 
-- [Test 智能合约如何判断contains](https://raw.githubusercontent.com/a186r/3db64kss/master/test.md)
-- [Test 智能合约Array](https://github.com/a186r/3db64kss/blob/master/test.md)
-- [Test 智能合约业务合约与数据合约分离](https://github.com/a186r/3db64kss/blob/master/test.md)
+- [智能合约如何判断Array中某个元素是否存在](https://raw.githubusercontent.com/a186r/3db64kss/master/array-contains-element.md)
