@@ -1,5 +1,5 @@
 ## 欢迎来到 3DB64KSS GitHub Pages
-这里是一些简单的博客记录
+这里是一些简单的博客记录，网站访问链接： [https://a186r.github.io/3db64kss/](https://a186r.github.io/3db64kss/)
 
 ### 文章列表
 ***/Contract***
