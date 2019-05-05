@@ -13,3 +13,4 @@
 
 ***/Linux***
 - [Linux下加密压缩与解压](https://github.com/a186r/3db64kss/blob/master/linux/linux-encryption-compression.md)
+- [在ubuntu上安装nextcloud](https://github.com/a186r/3db64kss/blob/master/linux/ubuntu-nextcloud.md)
