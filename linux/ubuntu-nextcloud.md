@@ -43,7 +43,7 @@ mysql安装完成了，接下里是一些配置：
 
 5. 重启mysql即可
 
-   `sudo servive myaql restart`
+   `sudo service mysql restart`
 
 至此，mysql安装就完成了，可以使用 `mysql -u root -p` 登入到mysql中。
 
