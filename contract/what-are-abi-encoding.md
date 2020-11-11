@@ -1,4 +1,4 @@
-## ABI encoding是什么
+## 什么是ABI encoding
 Solidity自从0.4.24之后添加了许多ABI编码方法，文档中是这样描述的：
 
 - `abi.decode(bytes memory encodedData, (...)) returns (...)`: ABI解码给定的数据，类型作为第二个参数在括号中给出。
