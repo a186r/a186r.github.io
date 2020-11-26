@@ -148,3 +148,28 @@ contract auction {
     }
 }
 ```
+
+**对于不受信的代码，不要使用delegatecall**
+
+`delegatecall`用于从其他合约中调用函数，就好像它们属于调用者合约一样。因此，被调用方可以更改
+调用方的状态，这可能是不安全的。下面的示例显示了使用`delegatecall`如何导致合约被破坏状态被修改。
+
+```solidity
+contract Destructor{
+    function doWork() external {
+        selfdestruct(0);
+    }
+}
+
+contract Worker {
+    function doWork(address _internalWorker) public {
+        // 不安全
+        _internalWorker.delegatecall(bytes4(keccak256("doWork()")));
+    }
+}
+```
+
+在上面的例子中，如果使用已部署的Destructor合约的地址作为参数调用`Worker.doWork()`，`Worker`
+合约将会自毁，所以，应该仅将delegatecall用于被信任的合约，而不应该委托给用户提供的地址。
+
+> 不要假设合约的余额为0。攻击者可以在创建合约之前向其地址发送以太币。合约不应该假设其初始状态包含0余额。
