@@ -99,4 +99,52 @@ ExternalContract(someAddress).deposit.value(100)();
 **支持pull over push对于外部调用** 
 
 外部调用可能会意外或者故意失败。为了最大程度减少此类故障导致的损失，通常最好将每个外部调用隔离到
-自己的事务中，该事务可以自由地由调用的接收者发起。
+自己的事务中，该事务可以自由地由调用的接收者发起。这与付款特别相关，在这种情况下，最好让用户自己
+提取资金，而不是自动将资金推给他们（这也减少了气体限制出现问题的机会），避免在一次交易中合并多个
+以太坊转账。
+
+```solidity
+//bad
+contract auction {
+    address highestBidder;
+    uint highestBid;
+    
+    function bid() payable {
+        require(msg.value >= highestBid);
+        
+        if(highestBidder != address(0)) {
+            (bool success, ) = highestBidder.call.value(highestBid)("");
+            require(success);
+        }
+        
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+    }
+}
+
+// good
+contract auction {
+    address highestBidder;
+    uint highestBid;
+    mapping(address => uint) refunds;
+
+    function bid() payable external {
+        require(msg.value >= highestBid);
+        
+        if(highestBidder != address(0)) {
+            // 记录用户可提取的资金
+            refunds[highestBidder] += highestBid;
+        }
+        
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+    }
+
+    function withdrawRefund() external {
+        uint refund = refunds[msg.sender];
+        refunds[msg.sender] = 0;
+        (bool success, ) = msg.sender.call.value(refund)("");
+        require(success);
+    }
+}
+```
