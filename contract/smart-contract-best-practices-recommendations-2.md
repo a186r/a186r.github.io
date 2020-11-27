@@ -23,3 +23,22 @@ contract Token{
 请注意，上面不能用等号判断，因为可以在不通过`deposit()`函数的情况下将以太币强制发送给合约。
 
 ## 正确使用`assert(), require(), revert()`
+> 函数`assert`和`require`可以用于检查条件，如果不满足条件则抛出异常。
+> `assert`方法应仅用于测试内部错误和检查不变性
+> `require`方法应用于确保满足输入或合约状态变量之类的有效条件，或用于验证从调用外部合约获得的返回值
+
+```solidity
+pragma solidity ^0.5.0;
+
+contract Sharer {
+    function sendHalf(address payable addr) public payable returns (uint balance) {
+        require(msg.value % 2 == 0, 'Event value required.');
+        uint balanceBeforeTransfer = address(this).balance;
+        (bool success, ) = addr.call.value(msg.value / 2)("");
+        require(success);
+        //assert用于内部错误检查 
+        assert(address(this).balance == balanceBeforeTransfer - msg.value / 2);
+        return address(this).balance;
+    }
+}
+```
