@@ -43,7 +43,7 @@ contract Sharer {
 }
 ```
 
-## 修饰符modifier仅用于检查
+## 修饰符modifier仅用于条件检查
 修饰符内部的代码通常在函数主题之前执行，因此任何状态更改或外部调用都将违反checks-effects-interactions模式。
 因此，由于修饰符的代码可能与函数声明相去甚远，因此开发人员可能也不会注意到这些语句，例如，修饰符中的
 外部调用可能导致重入攻击
@@ -72,3 +72,24 @@ contract Election {
 }
 ```
 在这种情况下，`Registry`合约可以通过在`isVoter()`中调用`Election.vote()`来进行重入攻击。
+
+##小心整数除法舍入
+所有整数除法均四舍五入为最接近的整数。如果需要更高的精度，请考虑使用乘数，或者同事存储分子和分母。
+(未来，Solidity将会有一个`fixed-point`类型，这将使此操作更容易。)
+```solidity
+// bad
+uint x = 5 / 2; // 结果是2，所有整数除法均向下舍入到最接近的整数。
+```
+使用乘数可以防止舍入，将来使用x时需要考虑此乘数。
+```solidity
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+```
+存储分子和分母意味着你可以在链下计算分子/分母的结果。
+```solidity
+//good
+uint numerator = 5;
+uint denominator = 2;
+```
+
