@@ -328,3 +328,51 @@ function random(uint Max) constant private returns (uint256 result) {
 
 可以使用`block.number`和平均区块时间来估计时间增量，但是由于区块时间可能会发生变化(例如区块重组和
 难度炸弹)，因此这并不是未来的证明。在几天的销售中，15秒规则可以使你更可靠的估计时间。
+
+## 多重继承警告
+在Solidity中使用多重继承时，了解编译器如何构成继承图非常重要。
+```solidity
+contract Final {
+    uint public a;
+
+    function Final(uint f) public {
+        a = f;
+    }
+}
+
+contract B is Final {
+    int public fee;
+    
+    function B(uint f) Final(f) public {
+
+    }
+    
+    function setFee() public {
+        fee = 3;
+    }
+}
+
+contract C is Final {
+    int public fee;
+    
+    function C(uint f) Final(f) public {
+        
+    }
+
+    function setFee() public {
+        fee =5;
+    }
+}
+
+contract A is B, C {
+    function A() public B(3) C(5) {
+        setFee();
+    }
+}
+```
+部署合约后，编译器将从右到左线性化继承。这是合约A的线性化：
+> **Final <- B <- C <- A** 
+
+线性化的结果是fee将会是5，因为C是最衍生的合约。这看起来似乎很明显，但是可以想象一下C能够掩盖关键功能，
+重新排列布尔子句并导致开发人员编写可以用合约的情况。当然，静态分析不会因过大的功能引起问题，因此必须进行
+手动检查。
