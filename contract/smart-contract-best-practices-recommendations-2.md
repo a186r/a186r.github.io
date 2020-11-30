@@ -237,3 +237,19 @@ contract Game {
 
 >**更喜欢新的Solidity结构**。更喜欢`selfdestruct`(好过`suicide`)和`keccak256`(好过`sha3`).
 >像这样的模式`require(msg.sender.value(1 ether))`也可以简单的使用`transfer()`，`msg.sender.transfer(1 ether)`.
+
+## 请注意`内置`可能被遮盖
+目前可以在Solidity中隐藏内置全局变量。这允许合约覆盖诸如`msg`和`revert()`之类的内置功能。尽管
+这样做是有意的，但它可能会误导合约的用户，使他们了解合约的真实行为。
+```solidity
+contract PretendingToRevert {
+    function revert() internal constant {}
+}
+
+contract ExampleContract is PretendingToRevert {
+    function somethingBad() public {
+        revert();
+    }
+}
+```
+合约用户和审核员应该了解他们打算使用的任何应用程序的完整智能合约源码
