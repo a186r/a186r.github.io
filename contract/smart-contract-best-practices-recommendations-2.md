@@ -376,3 +376,48 @@ contract A is B, C {
 线性化的结果是fee将会是5，因为C是最衍生的合约。这看起来似乎很明显，但是可以想象一下C能够掩盖关键功能，
 重新排列布尔子句并导致开发人员编写可以用合约的情况。当然，静态分析不会因过大的功能引起问题，因此必须进行
 手动检查。
+
+## 使用接口类型代替地址，以确保类型安全
+当函数将合约地址作为参数时，最好传递接口或合约类型，而不是原始地址。如果在源代码中的其它位置调用该函数，
+则编译器将提供附加的类型安全保证。
+
+这里可以看到两种选择:
+```solidity
+contract Validator {
+    function validate(uint) external returns (bool);
+}
+
+contract TypeSafeAuction {
+    //good
+    function validateBet(Validator _validator, uint _value) internal returns (bool) {
+        bool valid = _validator.validate(_value);
+        return valid;
+    }
+}
+
+contract TypeUnsafeAuction {
+    //bad
+    function validateBet(address _addr, uint _value) internal returns (bool) {
+        Validator validator = Validator(_addr);
+        bool valid = validator.validate(_value);
+        return valid;
+    }
+}    
+```
+
+从上面的示例中可以看出，使用上述`TypeSafeAuction`合约的好处。如果用地址参数或者`Validator`以外的
+合约类型调用`validateBet()`，则编译器将会引发如下错误：
+
+```solidity
+contract NonValidator{}
+
+contract Auction is TypeSafeAuction {
+    NonValidator nonValidator;
+    
+    function bet(uint _value) {
+        // TypeError: Invalid type for argument in function call.
+        bool valid = validateBet(nonValidator, _value);
+    }
+}
+```
+
