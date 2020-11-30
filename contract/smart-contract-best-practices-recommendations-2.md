@@ -136,3 +136,36 @@ function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.
 > 可能不那么明显, `payable`修饰符仅适用于来自外部合约的调用。如果我在同一合约的`payable`方法中
 > 调用了`non-payable`方法，即使设置了`msg.value`，`non-payable`方法也不会失败。
 
+## 明确标记函数和状态变量的可见性
+明确标记函数和状态变量的可见性。函数可以将功能指定为`external, public, internal, private`，
+请理解它们之间的区别，例如，`external`可能足以替代`public`，对于状态变量，`external`是不可用的。
+明确标记可见性将使你更容易发现关于谁可以调用函数或访问变量的错误假设。
+- `External` 函数是合约接口的一部分。外部函数`f`不能被内部调用(i.e. `f()`不起作用，但是`this.f()`有效)。
+当接收大量数据时，使用外部函数更有效。
+- `Public` 函数是合约接口的一部分。可以在内部或通过`call`进行调用。对于`public`的状态变量，将自动
+生成一个`getter`方法。
+- `Internal` 函数和状态变量只能内部访问，而不能使用它。
+- `Private` 函数和状态变量仅对定义的合约可见，而在派生合约中不可见。**注意：合约内的所有内容，对于
+区块链外部的所有观察者都是可见的，甚至是似有变量（Private）**
+
+```solidity
+//bad
+uint x; // 默认是internal的，但是应该明确
+function buy() { // 默认是public的
+    // public code
+}
+
+//good
+uint private y;
+function buy() external {
+    // 只能在外部调用或者使用this.buy()
+}
+
+function utility() public {
+    // 可以在内部和外部调用：更改此代码需要考虑两种调用的可能情况
+}
+
+function internalAction() internal {
+    // internal code
+}
+```
