@@ -295,3 +295,36 @@ contract AttackingContract {
 
 还值得一提的是，使用`tx.origin`限制了合约之间的互操作性，因为使用`tx.origin`的合约不能被另一个
 合约使用，因为合约不能是`tx.origin`
+
+## 时间戳使用
+使用时间戳执行合约中的关键功能时，主要要考虑三个方面，尤其是在涉及资金转移的操作中。
+
+**时间戳操纵** 
+
+请注意，矿工可以操纵该区块的时间戳，考虑下面的合约：
+```solidity
+uint256 constant private salt = block.timestamp;
+
+function random(uint Max) constant private returns (uint256 result) {
+    // get the best seed from randomness
+    uint256 x = salt * 100/Max;
+    uint256 y = salt * block.number/(salt % 5);
+    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y;
+    uint256 h = uint256(block.blockhash(seed));
+    
+    return uint256((h / x)) % Max + 1;
+}
+```
+当合约使用时间戳为左随机数的种子时，矿工实际上可以在经过验证的区块后15秒钟内发布时间戳，从而有效地
+使矿工预先计算初更有利于其彩票机会的期权。时间戳不是随机的，因此不应该在上下文内使用。
+
+**15秒规则** 
+
+以太坊黄皮书未指定在时间上可以产生多少块的约束，但确实指定了每个时间戳都应大于其父级的时间戳。以太坊
+协议的客户端实现Geth和Parity都将拒绝时间戳超过15秒的块。因此评估时间戳使用情况的一个好的经验法则是：
+>如果与时间相关的事件的大小可以相差15秒并保持完整性，则可以使用`block.timestamp`.
+
+**避免使用`block.number`作为时间戳** 
+
+可以使用`block.number`和平均区块时间来估计时间增量，但是由于区块时间可能会发生变化(例如区块重组和
+难度炸弹)，因此这并不是未来的证明。在几天的销售中，15秒规则可以使你更可靠的估计时间。
