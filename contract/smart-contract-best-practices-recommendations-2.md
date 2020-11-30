@@ -42,3 +42,33 @@ contract Sharer {
     }
 }
 ```
+
+## 修饰符modifier仅用于检查
+修饰符内部的代码通常在函数主题之前执行，因此任何状态更改或外部调用都将违反checks-effects-interactions模式。
+因此，由于修饰符的代码可能与函数声明相去甚远，因此开发人员可能也不会注意到这些语句，例如，修饰符中的
+外部调用可能导致重入攻击
+
+```solidity
+contract Registry {
+    address owner;
+    
+    function isVoter(address _addr) external returns(bool) {
+        // code
+        return true;
+    }
+}
+
+contract Election {
+    Registry registry;
+    
+    modifier isEligible(address _addr) {
+        require(registry.isVoter(_addr));
+        _;
+    }
+    
+    function vote() isEligible(msg.sender) public {
+        // code
+    }
+}
+```
+在这种情况下，`Registry`合约可以通过在`isVoter()`中调用`Election.vote()`来进行重入攻击。
