@@ -188,3 +188,52 @@ pragma solidity 0.4.4;
 >当合约打算供其他人使用时，可以允许pragma语句浮动，例如库或者EthPM软件包中的合约。否则，开发人员
 >将需要手动更新编译器以便本地编译
 
+## 使用事件监视合约活动
+部署合约后，有一种监视合约的方法可能会很有用。实现此目的的一种方法是查看合约的所有交易，但是由于
+合约之间的消息调用未记录在区块链中，因此这可能是不够的。此外，它仅显示输入参数，而不显示对该状态的
+实际修改。事件也可以用于除法用户界面中的功能。
+```solidity
+contract Charity {
+    mapping(address => uint) balances;
+
+    function donate() payable public {
+        balances[msg.sender] += msg.value;
+    }
+}
+
+contract Game {
+    function buyCoins() payable public {
+        // 5%给charity
+        charity.donate.value(msg.value / 20)();
+    }
+}
+```
+在这里，Game合约将对`charity.donate`进行内部调用。该交易不会出现在`charity`的外部交易列表中，而
+只会在内部交易中显示。
+
+事件是记录合约中发生的事情的便捷的方法。发出的事件与其它合约数据一起留在区块链中，可供以后审核，这是
+对以上示例的改进，使用事件提供了慈善捐赠的历史记录。
+
+```solidity
+contract Charity {
+    // 定义事件
+    event LogDonate(uint _amount);
+
+    mapping(address => uint) balances;
+    
+    function donate() payable public {
+        balances[msg.sender] += msg.value;
+        emit LogDonate(msg.value);
+    }
+}
+
+contract Game {
+    function buyCoins() payable public {
+        charity.donate.value(msg.value / 20)();
+    }
+}
+```
+在这里，所有通过`Charity`合约的交易，无论直接与否，都将与捐赠金额一起显示在该合约的事件列表中。
+
+>**更喜欢新的Solidity结构**。更喜欢`selfdestruct`(好过`suicide`)和`keccak256`(好过`sha3`).
+>像这样的模式`require(msg.sender.value(1 ether))`也可以简单的使用`transfer()`，`msg.sender.transfer(1 ether)`.
