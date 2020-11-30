@@ -421,3 +421,52 @@ contract Auction is TypeSafeAuction {
 }
 ```
 
+## 避免使用`extcodesiz`检查外部拥有的账户
+通常使用以下修饰符来检查调用是从外部账户还是从合约账户进行的。
+```solidity
+//bad
+modifier isNotContract(address _a) {
+    uint size;
+    assembly{
+        size := extcodesize(_a)
+    }
+    require(size == 0);
+    _;
+}
+```
+
+这个想法很简单，如果一个地址包含代码，则它不是EOA，而是合约账户。但是，**合约在构造期间没有可用的源代码**,
+这意味着构造函数在运行时可以调用其它合约，但是其地址的`extcodesize`返回零。下面是一个最小示例，
+显示了如何规避此检查：
+
+```solidity
+contract OnlyForEOA {
+    uint public flag;
+    
+    //bad
+    modifier isNotContract(address _a) {
+        uint len;
+        assembly { len := extcodesize(_a) }
+        require(len == 0);
+        _;
+    }
+    
+    function setFlag(uint i) public isNotContract(msg.sender) {
+        flag = i;
+    }
+}
+
+contract FakeEOA {
+    constructor(address _a) public {
+        OnlyForEOA c = OnlyForEOA(_a);
+        c.setFlag(1);
+    }
+}
+```
+
+由于合约地址可以预先计算，因此如果检查在第n个块为空但大于n的某个块中部署了合约的地址，则此检查也可能
+失败。
+
+>这个问题是细微的，如果你的目标是阻止其它合约能够调用你的合约，则extcodesize检查可能就足够了。一种
+>替代方法是检查(tx.origin == msg.sender)的值，尽管这样做也有缺点。
+>在其它情况下，extcodesize检查可以满足你的要求。
