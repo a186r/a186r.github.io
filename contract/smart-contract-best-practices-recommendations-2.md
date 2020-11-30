@@ -421,7 +421,7 @@ contract Auction is TypeSafeAuction {
 }
 ```
 
-## 避免使用`extcodesiz`检查外部拥有的账户
+## 避免使用`extcodesiz`检查外部账户
 通常使用以下修饰符来检查调用是从外部账户还是从合约账户进行的。
 ```solidity
 //bad

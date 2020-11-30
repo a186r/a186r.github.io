@@ -8,6 +8,8 @@
 - [<font size=4>abi.encodeWithSelector方法是用来做什么的</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/what-does-the-function-abi-encodewithselector.md)
 - [<font size=4>使用abi.encodeWithSelector调用其他合约的函数</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/use-abi-encode-with-selector-call-contract.md)
 - [<font size=4>智能合约开发最佳实践-协议特定建议</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/smart-contract-best-practices-recommendations-1.md)
+- [<font size=4>智能合约开发最佳实践-针对Solidity的建议</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/smart-contract-best-practices-recommendations-2.md)
+
 
 #### ***/Linux*** ####
 - [<font size=4>Linux下加密压缩与解压</font>](https://github.com/a186r/a186r.github.io/blob/master/linux/linux-encryption-compression.md)
