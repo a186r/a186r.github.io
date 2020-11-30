@@ -253,3 +253,45 @@ contract ExampleContract is PretendingToRevert {
 }
 ```
 合约用户和审核员应该了解他们打算使用的任何应用程序的完整智能合约源码
+
+## 避免使用`tx.origin`
+切勿使用`tx.origin`进行授权，另一些合约可以有一种方法来调用你的合约(例如，用户拥有一些资金)，并且
+你的合约将授权你进行交易，因为你的地址在tx.origin中。
+
+```solidity
+contract MyContract {
+    address owner;
+    
+    function MyContract() public {
+        owner = msg.sender;
+    }
+    
+    function sendTo(address receiver, uint amount) public {
+        require(tx.origin == owner);
+        (bool success, ) = receiver.call.value(amount)("");
+        require(success); 
+    }
+}
+
+contract AttackingContract {
+    MyContract myContract;
+    address attacker;
+    
+    constructor(address myContractAddress) public {
+        myContract = MyContract(myContractAddress);
+        attacker = msg.sender;
+    }
+    
+    function() public {
+        myContract.sendTo(attacker, msg.sender.balance);
+    }
+}
+```
+你应该使用`msg.sender`来进行授权，如果另一个合约调用你的合约，则`msg.sender`将是合约的地址，而
+不是调用该合约的用户的地址。
+
+>除了授权问题之外，将来还有可能从以太坊协议中删除`tx.origin`，因此使用`tx.origin`的代码将与
+>以后的版本不兼容。vitalik:不要以为`tx.origin`将继续可用或有意义。
+
+还值得一提的是，使用`tx.origin`限制了合约之间的互操作性，因为使用`tx.origin`的合约不能被另一个
+合约使用，因为合约不能是`tx.origin`
