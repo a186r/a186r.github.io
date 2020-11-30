@@ -128,3 +128,11 @@ function() payable { emit LogDepositReceived(msg.sender); }
 //good
 function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.sender); }
 ```
+
+## 明确标记payable方法和状态变量
+从Solidity `0.4.0` 开始，每个接收以太币的函数都必须使用`payable`修饰符，否则，如果交易的
+`msg.value > 0` 将被`revert`
+
+> 可能不那么明显, `payable`修饰符仅适用于来自外部合约的调用。如果我在同一合约的`payable`方法中
+> 调用了`non-payable`方法，即使设置了`msg.value`，`non-payable`方法也不会失败。
+
