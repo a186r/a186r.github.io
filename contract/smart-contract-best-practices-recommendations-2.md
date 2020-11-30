@@ -99,3 +99,32 @@ uint denominator = 2;
 使抽象合约更加实用。虽然，接口对于在实现之前设计合约肯定是有用的。此外，重要的是要记住，如果合约从抽
 象合约继承，那么它必须通过覆盖实现所有未实现的功能，否则它也将是抽象的。
 
+## 回调方法
+**保持回调方法简单** 
+
+向合约发送不带参数的消息(或没有函数匹配)时调用回调函数，从`send()`或`transfer()`调用时只能使
+用2300gas，如果你希望能够从`send()`或`transfer()`接收以太币，则在回调函数中可以做的最大的事情
+就是记录一个事件，如果需要更多的gas，请使用适当的函数。
+
+```solidity
+//bad
+function() payable { balances[msg.sender] += msg.value; }
+
+//good
+function deposit() payable external { balances[msg.sender] += msg.value; }
+
+function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.sender);}
+```
+
+**检查回调方法中的data长度** 
+
+由于回调方法不仅会调用纯ether交易(没有data)，还会在没有其它方法匹配的时候调用，如果回调方法仅用于
+记录接收到的以太币，则应检查数据是否为空。否则，调用者将不会注意到你的合约使用不正确，并且调用了不存
+在的函数。
+```solidity
+//bad
+function() payable { emit LogDepositReceived(msg.sender); }
+
+//good
+function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.sender); }
+```
