@@ -21,7 +21,7 @@
 
 *2020-12*
 
-- [<font size=4>智能合约中`external`和`public`的最佳实践</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/smart-contract-best-practices-recommendations-1.md)
+- [<font size=4>智能合约中`external`和`public`的最佳实践</font>](https://github.com/a186r/a186r.github.io/blob/master/contract/external-vs-public-practices.md)
 
 
 #### ***/Linux*** ####
